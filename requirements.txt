@@ -1,0 +1,6 @@
+ipdb
+aiohttp
+aiofiles
+click
+bs4
+tqdm
