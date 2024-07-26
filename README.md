@@ -46,6 +46,6 @@ The captcha is located in the captcha_image.png file.
 --------------------------------------------------------------------------------
 Captcha text:
 ```
-What you need to do is open file named `captcha_image.png` that's located in the script directory and pass what you see on the image. No worries, the script will do it's work.
+What you need to do is open file named `captcha_image.png` that's located in the script directory and type what you see on the image. No worries, the script will do it's work.
 
 If you'll fail to solve the captcha, no worries, you'll get prompted again and the image will be overwritten so just open it and pass the new captcha.

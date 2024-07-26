@@ -1,10 +1,14 @@
 import os
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
 from gox import (
+    DEFAULT_TIMEOUT,
+    HEADERS,
+    download_captcha,
     get_output_path,
     lookup_for_captcha,
     title_to_filename,
@@ -47,3 +51,32 @@ async def test_lookup_for_captcha():
     async with ClientSession() as session:
         assert await lookup_for_captcha(soup_with_captcha, session)
         assert not await lookup_for_captcha(soup_without_captcha, session)
+
+
+@pytest.mark.asyncio
+async def test_download_captcha(mocker):
+    captcha_url = "https://vider.pl/captcha_url"
+    captcha_content = b"qi9ewufihadsbjkvnsioouhregyhadJKSOIFHU"
+
+    mock_response = MagicMock()
+    mock_response.read = AsyncMock(return_value=captcha_content)
+    mock_get = MagicMock()
+    mock_get.__aenter__.return_value = mock_response
+    # mock_get.__aenter__.return_value
+    mock_get.__aexit__.return_value = AsyncMock()
+
+    mock_session = MagicMock()
+    mock_session.get.return_value = mock_get
+
+    # moching aiofiles to return an async context manager
+    mock_open = mocker.patch("aiofiles.open", new_callable=MagicMock)
+    mock_file = mock_open.return_value.__aenter__.return_value
+    mock_file.write = AsyncMock()
+
+    await download_captcha(captcha_url, mock_session)
+
+    mock_session.get.assert_called_once_with(
+        captcha_url, headers=HEADERS, timeout=DEFAULT_TIMEOUT
+    )
+    mock_open.assert_called_once_with("captcha_image.png", "wb")
+    mock_file.write.assert_awaited_once_with(captcha_content)
